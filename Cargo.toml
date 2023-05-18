@@ -7,7 +7,3 @@ edition = "2021"
 
 [dependencies]
 clap-sys = "0.3.0"
-slint = "1.0.2"
-
-[build-dependencies]
-slint-build = "1.0.0"

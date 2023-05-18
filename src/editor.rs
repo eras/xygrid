@@ -95,6 +95,7 @@ impl IcedEditor for XygridEditor {
                 Text::new("Xygrid GUI")
                     .font(assets::NOTO_SANS_LIGHT)
                     .size(40)
+                    .color(Color::WHITE)
                     .height(50.into())
                     .width(Length::Fill)
                     .horizontal_alignment(alignment::Horizontal::Center)
@@ -104,11 +105,12 @@ impl IcedEditor for XygridEditor {
                 Text::new("Xygrid")
                     .height(20.into())
                     .width(Length::Fill)
+                    .color(Color::WHITE)
                     .horizontal_alignment(alignment::Horizontal::Center)
                     .vertical_alignment(alignment::Vertical::Center),
             )
             .push(
-		xy_input::XyInput::new(&mut self.xy_input, &self.params.x, &self.params.y).width(Length::from(300)).height(Length::from(300)).map(Message::ParamUpdate)
+		xy_input::XyInput::new(&mut self.xy_input, &self.params.x, &self.params.y).width(Length::from(900)).height(Length::from(900)).map(Message::ParamUpdate)
 	    )
             // .push(
             //     nih_widgets::ParamSlider::new(&mut self.gain_slider_state, &self.params.gain)
@@ -127,9 +129,9 @@ impl IcedEditor for XygridEditor {
 
     fn background_color(&self) -> nih_plug_iced::Color {
         nih_plug_iced::Color {
-            r: 0.98,
-            g: 0.98,
-            b: 0.98,
+            r: 0.2,
+            g: 0.2,
+            b: 0.2,
             a: 1.0,
         }
     }

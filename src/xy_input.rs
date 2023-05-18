@@ -137,11 +137,11 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
         renderer.fill_quad(
             renderer::Quad {
                 bounds,
-                border_color: Color::from_rgb(1.0, 0.0, 0.0),
+                border_color: Color::WHITE,
                 border_width: 5.0,
-                border_radius: 3.0,
+                border_radius: 10.0,
             },
-            Color::from_rgb(0.0, 1.0, 0.0),
+            Color::BLACK,
         );
 
 	let x_in_bounds = bounds.center_x() + self.state.x * bounds.width / 2.0;
@@ -155,11 +155,11 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
         renderer.fill_quad(
             renderer::Quad {
                 bounds: xy_bounds,
-                border_color: Color::from_rgb(1.0, 0.0, 1.0),
+                border_color: Color::WHITE,
                 border_width: 5.0,
                 border_radius: 5.0,
             },
-            Color::from_rgb(0.0, 0.0, 1.0),
+            Color::from_rgb(0.8, 0.8, 0.8),
         );
 
 	// {

@@ -1,7 +1,7 @@
 use nih_plug::prelude::*;
 
-use rust_clap_test::Gain;
+use xygrid::Xygrid;
 
 fn main() {
-    nih_export_standalone::<Gain>();
+    nih_export_standalone::<Xygrid>();
 }

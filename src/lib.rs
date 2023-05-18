@@ -32,6 +32,9 @@ struct XygridParams {
 
     #[id = "x"]
     pub x: FloatParam,
+
+    #[id = "y"]
+    pub y: FloatParam,
 }
 
 impl Default for Xygrid {
@@ -50,7 +53,9 @@ impl Default for XygridParams {
         Self {
             editor_state: editor::default_state(),
 
-	    x: FloatParam::new("X", 0.0, FloatRange::Linear { min: -1.0, max: 1.0 })
+	    x: FloatParam::new("X", 0.0, FloatRange::Linear { min: -1.0, max: 1.0 }),
+
+	    y: FloatParam::new("Y", 0.0, FloatRange::Linear { min: -1.0, max: 1.0 }),
 
             // See the main gain example for more details
             // gain: FloatParam::new(

@@ -68,9 +68,9 @@ impl IcedEditor for XygridEditor {
         (editor, Command::none())
     }
 
-    fn scale_policy(&self) -> WindowScalePolicy {
-	WindowScalePolicy::ScaleFactor(2.0)
-    }
+    // fn scale_policy(&self) -> WindowScalePolicy {
+    // 	WindowScalePolicy::ScaleFactor(2.0)
+    // }
 
     fn context(&self) -> &dyn GuiContext {
         self.context.as_ref()
@@ -108,7 +108,7 @@ impl IcedEditor for XygridEditor {
                     .vertical_alignment(alignment::Vertical::Center),
             )
             .push(
-		xy_input::XyInput::new(&mut self.xy_input, &self.params.x).map(Message::ParamUpdate)
+		xy_input::XyInput::new(&mut self.xy_input, &self.params.x, &self.params.y).width(Length::from(300)).height(Length::from(300)).map(Message::ParamUpdate)
 	    )
             // .push(
             //     nih_widgets::ParamSlider::new(&mut self.gain_slider_state, &self.params.gain)

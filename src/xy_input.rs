@@ -10,7 +10,8 @@ use nih_plug_iced::widgets::ParamMessage;
 pub struct XyInput<'a, P: Param> {
     state: &'a mut State,
 
-    param: &'a P,
+    x_param: &'a P,
+    y_param: &'a P,
 
     height: Length,
     width: Length,
@@ -27,14 +28,15 @@ pub enum Message {
 }
 
 impl<'a, P: Param> XyInput<'a, P> {
-    pub fn new(state: &'a mut State, param: &'a P) -> Self {
+    pub fn new(state: &'a mut State, x_param: &'a P, y_param: &'a P) -> Self {
         Self {
             state,
 
-            param,
+            x_param,
+            y_param,
 
-            width: Length::Units(180),
-            height: Length::Units(30),
+            width: Length::Units(100),
+            height: Length::Units(100),
         }
     }
 
@@ -51,6 +53,32 @@ impl<'a, P: Param> XyInput<'a, P> {
     }
 }
 
+impl<'a, P: Param> XyInput<'a, P> {
+    fn set_normalized_value(&self, shell: &mut Shell<'_, ParamMessage>,
+			    normalized_x_value: f32,
+			    normalized_y_value: f32) {
+        // This snaps to the nearest plain value if the parameter is stepped in some way.
+        // TODO: As an optimization, we could add a `const CONTINUOUS: bool` to the parameter to
+        //       avoid this normalized->plain->normalized conversion for parameters that don't need
+        //       it
+        let plain_x_value = self.x_param.preview_plain(normalized_x_value);
+        let plain_y_value = self.y_param.preview_plain(normalized_y_value);
+        let current_plain_x_value = self.x_param.modulated_plain_value();
+        let current_plain_y_value = self.y_param.modulated_plain_value();
+        if plain_x_value != current_plain_x_value || plain_y_value != current_plain_y_value {
+	    shell.publish(ParamMessage::SetParameterNormalized(
+                self.x_param.as_ptr(),
+                normalized_x_value,
+	    ));
+	    shell.publish(ParamMessage::SetParameterNormalized(
+                self.y_param.as_ptr(),
+                normalized_y_value,
+	    ));
+        }
+    }
+
+}
+
 impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
     fn width(&self) -> Length {
         self.width
@@ -65,6 +93,35 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
         let size = limits.resolve(Size::ZERO);
 
         layout::Node::new(size)
+    }
+
+    fn on_event(
+        &mut self,
+        event: Event,
+        layout: Layout<'_>,
+        cursor_position: Point,
+        renderer: &Renderer,
+        clipboard: &mut dyn Clipboard,
+        shell: &mut Shell<'_, ParamMessage>,
+    ) -> event::Status {
+	let bounds = layout.bounds();
+        match event {
+            Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+		| Event::Touch(touch::Event::FingerPressed { .. }) if bounds.contains(cursor_position) => {
+		    let x = (cursor_position.x - bounds.center_x()) / bounds.width * 2.0;
+		    let y = (cursor_position.y - bounds.center_y()) / bounds.height * 2.0;
+
+		    shell.publish(ParamMessage::BeginSetParameter(self.x_param.as_ptr()));
+		    shell.publish(ParamMessage::BeginSetParameter(self.y_param.as_ptr()));
+		    self.set_normalized_value(shell, x, y);
+		    shell.publish(ParamMessage::EndSetParameter(self.x_param.as_ptr()));
+		    shell.publish(ParamMessage::EndSetParameter(self.y_param.as_ptr()));
+		    event::Status::Captured
+		}
+	    _ => {
+		event::Status::Ignored
+	    }
+	}
     }
 
     fn draw(
@@ -85,6 +142,24 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
                 border_radius: 3.0,
             },
             Color::from_rgb(0.0, 1.0, 0.0),
+        );
+
+	let x_in_bounds = bounds.center_x() + self.state.x * bounds.width / 2.0;
+	let y_in_bounds = bounds.center_y() + self.state.y * bounds.height / 2.0;
+
+	dbg!(self.state.x);
+
+	let xy_bounds = Rectangle::new(Point::new(x_in_bounds, y_in_bounds),
+				       Size { width: 10.0, height: 10.0 });
+
+        renderer.fill_quad(
+            renderer::Quad {
+                bounds: xy_bounds,
+                border_color: Color::from_rgb(1.0, 0.0, 1.0),
+                border_width: 5.0,
+                border_radius: 5.0,
+            },
+            Color::from_rgb(0.0, 0.0, 1.0),
         );
 
 	// {
@@ -132,11 +207,11 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
     //         // We'll visualize the difference between the current value and the default value if the
     //         // default value lies somewhere in the middle and the parameter is continuous. Otherwise
     //         // this appraoch looks a bit jarring.
-    //         let current_value = self.param.modulated_normalized_value();
-    //         let default_value = self.param.default_normalized_value();
+    //         let current_value = self.x_param.modulated_normalized_value();
+    //         let default_value = self.x_param.default_normalized_value();
     //         let fill_start_x = util::remap_rect_x_t(
     //             &bounds_without_borders,
-    //             if self.param.step_count().is_none() && (0.45..=0.55).contains(&default_value) {
+    //             if self.x_param.step_count().is_none() && (0.45..=0.55).contains(&default_value) {
     //                 default_value
     //             } else {
     //                 0.0
@@ -162,7 +237,7 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
 
     //         // To make it more readable (and because it looks cool), the parts that overlap with the
     //         // fill rect will be rendered in white while the rest will be rendered in black.
-    //         let display_value = self.param.to_string();
+    //         let display_value = self.x_param.to_string();
     //         let text_size = self.text_size.unwrap_or_else(|| renderer.default_size()) as f32;
     //         let text_bounds = Rectangle {
     //             x: bounds.center_x(),

@@ -7,3 +7,9 @@ edition = "2021"
 
 [dependencies]
 clap-sys = "0.3.0"
+nih_plug = { path = "ext/nih-plug", features = ["assert_process_allocs", "standalone"] }
+nih_plug_iced = { path = "ext/nih-plug/nih_plug_iced" }
+atomic_float = "0.1.0"
+
+[lib]
+crate-type = ["cdylib", "lib"]

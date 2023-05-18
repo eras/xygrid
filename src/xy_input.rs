@@ -21,10 +21,8 @@ pub struct XyInput<'a, P: Param> {
 pub struct State {
     x: f32,
     y: f32,
-}
 
-pub enum Message {
-    Position((f32, f32)),
+    drag_active: bool,
 }
 
 impl<'a, P: Param> XyInput<'a, P> {
@@ -54,7 +52,8 @@ impl<'a, P: Param> XyInput<'a, P> {
 }
 
 impl<'a, P: Param> XyInput<'a, P> {
-    fn set_normalized_value(&self, shell: &mut Shell<'_, ParamMessage>,
+    fn set_normalized_value(&self,
+			    shell: &mut Shell<'_, ParamMessage>,
 			    normalized_x_value: f32,
 			    normalized_y_value: f32) {
         // This snaps to the nearest plain value if the parameter is stepped in some way.
@@ -114,13 +113,35 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
 		    shell.publish(ParamMessage::BeginSetParameter(self.x_param.as_ptr()));
 		    shell.publish(ParamMessage::BeginSetParameter(self.y_param.as_ptr()));
 		    self.set_normalized_value(shell, x, y);
-		    shell.publish(ParamMessage::EndSetParameter(self.x_param.as_ptr()));
-		    shell.publish(ParamMessage::EndSetParameter(self.y_param.as_ptr()));
+		    // shell.publish(ParamMessage::EndSetParameter(self.x_param.as_ptr()));
+		    // shell.publish(ParamMessage::EndSetParameter(self.y_param.as_ptr()));
+		    self.state.drag_active = true;
 		    event::Status::Captured
 		}
-	    _ => {
-		event::Status::Ignored
+            Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))
+		| Event::Touch(touch::Event::FingerLifted { .. } | touch::Event::FingerLost { .. }) if self.state.drag_active => {
+                    // shell.publish(ParamMessage::EndSetParameter(self.param.as_ptr()));
+		    shell.publish(ParamMessage::EndSetParameter(self.x_param.as_ptr()));
+		    shell.publish(ParamMessage::EndSetParameter(self.y_param.as_ptr()));
+
+                    self.state.drag_active = false;
+
+                    event::Status::Captured
+		}
+            Event::Mouse(mouse::Event::CursorMoved { .. })
+            | Event::Touch(touch::Event::FingerMoved { .. }) => {
+                // Don't do anything when we just reset the parameter because that would be weird
+                if self.state.drag_active {
+		    let x = (cursor_position.x - bounds.x) / bounds.width;
+		    let y = (cursor_position.y - bounds.y) / bounds.height;
+
+		    self.set_normalized_value(shell, x, y);
+                    event::Status::Captured
+		} else {
+                    event::Status::Ignored
+		}
 	    }
+	    _ => event::Status::Ignored
 	}
     }
 
@@ -146,8 +167,6 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
 
 	let x_in_bounds = bounds.center_x() + self.state.x * bounds.width / 2.0;
 	let y_in_bounds = bounds.center_y() + self.state.y * bounds.height / 2.0;
-
-	dbg!(self.state.x);
 
 	let xy_bounds = Rectangle::new(Point::new(x_in_bounds, y_in_bounds),
 				       Size { width: 10.0, height: 10.0 });

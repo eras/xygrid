@@ -135,7 +135,7 @@ impl Plugin for Xygrid {
         &mut self,
         buffer: &mut Buffer,
         _aux: &mut AuxiliaryBuffers,
-        _context: &mut impl ProcessContext<Self>,
+        context: &mut impl ProcessContext<Self>,
     ) -> ProcessStatus {
         for channel_samples in buffer.iter_samples() {
             let mut amplitude = 0.0;
@@ -163,6 +163,24 @@ impl Plugin for Xygrid {
             //         .store(new_peak_meter, std::sync::atomic::Ordering::Relaxed)
             // }
         }
+
+	while let Some(event) = context.next_event() {
+	    //context.send_event(event);
+	}
+
+	context.send_event(NoteEvent::MidiCC {
+            timing: 0,
+            channel: 1,
+            cc: 70,
+            value: self.params.x.modulated_plain_value(),
+        });
+
+	context.send_event(NoteEvent::MidiCC {
+            timing: 0,
+            channel: 1,
+            cc: 71,
+            value: self.params.y.modulated_plain_value(),
+        });
 
         ProcessStatus::Normal
     }

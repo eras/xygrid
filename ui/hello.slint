@@ -1,6 +1,17 @@
-export component HelloWorld {
-    Text {
-        text: "hello world";
-        color: green;
-    }
+import { VerticalBox, Button } from "std-widgets.slint";
+
+export component HelloWorld inherits Window {
+    // Text {
+    //     text: "hello world";
+    //     color: black;
+    // }
+    in-out property <int> counter: 0;
+    VerticalBox {
+        button := Button {
+            text: "Button, pressed " + root.counter + " times";
+            clicked => {
+                root.counter += 1;
+            }
+        }
+    }    
 }

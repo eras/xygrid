@@ -4,6 +4,7 @@ use nih_plug_iced::IcedState;
 use std::sync::Arc;
 
 mod editor;
+mod xy_input;
 
 /// The time it takes for the peak meter to decay by 12 dB after switching to complete silence.
 //const PEAK_METER_DECAY_MS: f64 = 150.0;
@@ -29,8 +30,8 @@ struct XygridParams {
     #[persist = "editor-state"]
     editor_state: Arc<IcedState>,
 
-    // #[id = "gain"]
-    // pub gain: FloatParam,
+    #[id = "x"]
+    pub x: FloatParam,
 }
 
 impl Default for Xygrid {
@@ -48,6 +49,8 @@ impl Default for XygridParams {
     fn default() -> Self {
         Self {
             editor_state: editor::default_state(),
+
+	    x: FloatParam::new("X", 0.0, FloatRange::Linear { min: -1.0, max: 1.0 })
 
             // See the main gain example for more details
             // gain: FloatParam::new(

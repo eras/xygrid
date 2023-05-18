@@ -7,7 +7,7 @@ use std::time::Duration;
 use baseview::WindowScalePolicy;
 
 use crate::XygridParams;
-
+use crate::xy_input;
 
 // Makes sense to also define this here, makes it a bit easier to keep track of
 pub(crate) fn default_state() -> Arc<IcedState> {
@@ -29,6 +29,8 @@ struct XygridEditor {
     context: Arc<dyn GuiContext>,
 
     // peak_meter: Arc<AtomicF32>,
+
+    xy_input: xy_input::State,
 
     // gain_slider_state: nih_widgets::param_slider::State,
     // peak_meter_state: nih_widgets::peak_meter::State,
@@ -54,6 +56,8 @@ impl IcedEditor for XygridEditor {
         let editor = XygridEditor {
             params,
             context,
+
+	    xy_input: Default::default(),
 
             // peak_meter,
 
@@ -103,6 +107,9 @@ impl IcedEditor for XygridEditor {
                     .horizontal_alignment(alignment::Horizontal::Center)
                     .vertical_alignment(alignment::Vertical::Center),
             )
+            .push(
+		xy_input::XyInput::new(&mut self.xy_input, &self.params.x).map(Message::ParamUpdate)
+	    )
             // .push(
             //     nih_widgets::ParamSlider::new(&mut self.gain_slider_state, &self.params.gain)
             //         .map(Message::ParamUpdate),

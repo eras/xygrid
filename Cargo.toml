@@ -11,6 +11,7 @@ nih_plug = { path = "ext/nih-plug", features = ["assert_process_allocs", "standa
 nih_plug_iced = { path = "ext/nih-plug/nih_plug_iced" }
 atomic_float = "0.1.0"
 baseview = { git = "https://github.com/RustAudio/baseview.git" }
+iced = "0.9.0"
 
 [lib]
 crate-type = ["cdylib", "lib"]

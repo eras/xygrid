@@ -110,7 +110,9 @@ impl IcedEditor for XygridEditor {
                     .vertical_alignment(alignment::Vertical::Center),
             )
             .push(
-		xy_input::XyInput::new(&mut self.xy_input, &self.params.x, &self.params.y).width(Length::from(900)).height(Length::from(900)).map(Message::ParamUpdate)
+		xy_input::XyInput::new(&mut self.xy_input, &self.params.x, &self.params.y)
+		    .width(Length::from(900))
+		    .height(Length::from(900)).map(Message::ParamUpdate)
 	    )
             // .push(
             //     nih_widgets::ParamSlider::new(&mut self.gain_slider_state, &self.params.gain)

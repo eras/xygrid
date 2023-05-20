@@ -13,6 +13,9 @@ mod xy_input;
 pub struct Xygrid {
     params: Arc<XygridParams>,
 
+    prev_sent_x_value: Option<f32>,
+    prev_sent_y_value: Option<f32>,
+
     // /// Needed to normalize the peak meter's response based on the sample rate.
     // // peak_meter_decay_weight: f32,
     // /// The current data for the peak meter. This is stored as an [`Arc`] so we can share it between
@@ -41,6 +44,9 @@ impl Default for Xygrid {
     fn default() -> Self {
         Self {
             params: Arc::new(XygridParams::default()),
+
+	    prev_sent_x_value: None,
+	    prev_sent_y_value: None,
 
             // peak_meter_decay_weight: 1.0,
             // peak_meter: Arc::new(AtomicF32::new(util::MINUS_INFINITY_DB)),
@@ -165,22 +171,30 @@ impl Plugin for Xygrid {
         }
 
 	while let Some(event) = context.next_event() {
-	    //context.send_event(event);
+	    context.send_event(event);
 	}
 
-	context.send_event(NoteEvent::MidiCC {
-            timing: 0,
-            channel: 1,
-            cc: 70,
-            value: self.params.x.modulated_plain_value(),
-        });
+	let value = self.params.x.modulated_normalized_value();
+	if Some(value) != self.prev_sent_x_value {
+	    context.send_event(NoteEvent::MidiCC {
+		timing: 0,
+		channel: 0,
+		cc: 70,
+		value
+            });
+	    self.prev_sent_x_value = Some(value);
+	}
 
-	context.send_event(NoteEvent::MidiCC {
-            timing: 0,
-            channel: 1,
-            cc: 71,
-            value: self.params.y.modulated_plain_value(),
-        });
+	let value = self.params.y.modulated_normalized_value();
+	if Some(value) != self.prev_sent_y_value {
+	    context.send_event(NoteEvent::MidiCC {
+		timing: 0,
+		channel: 0,
+		cc: 71,
+		value,
+            });
+	    self.prev_sent_y_value = Some(value);
+	}
 
         ProcessStatus::Normal
     }

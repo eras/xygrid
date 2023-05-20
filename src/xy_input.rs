@@ -19,9 +19,6 @@ pub struct XyInput<'a, P: Param> {
 
 #[derive(Default)]
 pub struct State {
-    x: f32,
-    y: f32,
-
     drag_active: bool,
 }
 
@@ -157,8 +154,8 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
             Color::BLACK,
         );
 
-	let x_in_bounds = bounds.center_x() + self.state.x * bounds.width / 2.0;
-	let y_in_bounds = bounds.center_y() + self.state.y * bounds.height / 2.0;
+	let x_in_bounds = bounds.x + self.x_param.unmodulated_normalized_value() * bounds.width;
+	let y_in_bounds = bounds.y + self.y_param.unmodulated_normalized_value() * bounds.height;
 
 	let xy_bounds = Rectangle::new(Point::new(x_in_bounds, y_in_bounds),
 				       Size { width: 10.0, height: 10.0 });

@@ -199,11 +199,11 @@ impl ClapPlugin for Xygrid {
     ];
 }
 
-impl Vst3Plugin for Xygrid {
-    const VST3_CLASS_ID: [u8; 16] = *b"XygridAaAAaAaAaA";
-    const VST3_SUBCATEGORIES: &'static [Vst3SubCategory] =
-        &[Vst3SubCategory::Fx, Vst3SubCategory::Tools];
-}
+// impl Vst3Plugin for Xygrid {
+//     const VST3_CLASS_ID: [u8; 16] = *b"XygridAaAAaAaAaA";
+//     const VST3_SUBCATEGORIES: &'static [Vst3SubCategory] =
+//         &[Vst3SubCategory::Fx, Vst3SubCategory::Tools];
+// }
 
 nih_export_clap!(Xygrid);
-nih_export_vst3!(Xygrid);
+// nih_export_vst3!(Xygrid);

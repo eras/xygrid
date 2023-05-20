@@ -97,12 +97,12 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
         shell: &mut Shell<'_, ParamMessage>,
     ) -> event::Status {
 	let bounds = layout.bounds();
+	let x = (cursor_position.x - bounds.x) / bounds.width;
+	let y = (cursor_position.y - bounds.y) / bounds.height;
+
         match event {
             Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
 		| Event::Touch(touch::Event::FingerPressed { .. }) if bounds.contains(cursor_position) => {
-		    let x = (cursor_position.x - bounds.center_x()) / bounds.width * 2.0;
-		    let y = (cursor_position.y - bounds.center_y()) / bounds.height * 2.0;
-
 		    shell.publish(ParamMessage::BeginSetParameter(self.x_param.as_ptr()));
 		    shell.publish(ParamMessage::BeginSetParameter(self.y_param.as_ptr()));
 		    self.set_normalized_value(shell, x, y);
@@ -121,9 +121,6 @@ impl<'a, P: Param> Widget<ParamMessage, Renderer> for XyInput<'a, P> {
             Event::Mouse(mouse::Event::CursorMoved { .. })
             | Event::Touch(touch::Event::FingerMoved { .. }) => {
                 if self.state.drag_active {
-		    let x = (cursor_position.x - bounds.x) / bounds.width;
-		    let y = (cursor_position.y - bounds.y) / bounds.height;
-
 		    self.set_normalized_value(shell, x, y);
                     event::Status::Captured
 		} else {
